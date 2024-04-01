@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: frontend-ds
+  labels:
+    app: frontend
+spec:
+  template: 
+    metadata: 
+      name: my-pod-webserver
+      labels: 
+        apps: my-app
+        tier: frontend
+    spec:
+      containers:
+      - name: my-container-nginx
+        image: nginx
+    nodeSelector: # Seleciona através de label quais nodes o pod do daemon será adicionado, no caso label disktype com valor ssd
+      disktype: ssd
+    #nodeName: minikube # Adiciona o pod apenas nos nodes especificados pelo nome do node
+  selector:
+    matchLabels:
+      apps: my-app

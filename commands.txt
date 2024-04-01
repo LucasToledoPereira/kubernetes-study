@@ -1,0 +1,114 @@
+// Kubernetes for test/local
+minikube start
+minikube stop
+minikube pause
+minikube delete
+
+kubectl describe pods redis-pod //Descreve o pod
+kubectl get pods //Para listar pods
+kubectl get pods --all-namespaces //Lista pods em todos os namespaces
+kubectl run my-pod-1 --image httpd //Cria um pod com uma imagem do apache server
+kubectl get pods -o wide // Busca lista de pods com mais informacoes
+kubectl delete pods my-pod-apache-server // Exclui pod
+kubectl delete --all pods // Exclui todas as pods do namespaces default
+kubectl create -f my-pod.yaml // Cria pod atraves do arquivo yaml, ou seja, manifest
+kubectl apply -f my-pod.yaml // Aplica a instrucao contida no arquivo manifesto
+
+// ReplicaSet controla a quantidade de pods
+kubectl get replicaset //Lista ReplicaSets para o namespaces default
+kubectl delete replicaset frontend-rs // Exclui ReplicaSet
+kubectl delete --all replicaset // Exclui todos os ReplicaSets do namespaces default
+kubectl scale replicasets frontend-rs --replicas=5 // Faz o scale do ReplicaSet sem alterar o manifesto (Nao é uma boa prática)
+
+kubectl get services // Lista todos os servicos
+kubectl delete deployments frontend-deployment// Exclui Deployments
+kubectl delete --all deployments //  Exclui todos os Deployments do namespaces default
+kubectl delete deployments // Lista todos os deployments
+kubectl rollout status deployment.apps/frontend-deployment // Faz o rollout do deployment
+kubectl describe deployment.apps/frontend-deployment // Descreve as informacoes do deployment
+kubectl rollout history deployment.apps/frontend-deployment // Mostra informacoes sobre historico de revisoes/versoes
+kubectl rollout history deployment.apps/frontend-deployment --revision=1 // Mostra informacoes sobre historico de uma revisao especifica
+kubectl rollout undo deployment.apps/frontend-deployment  // Faz o rollback para a versao anterior
+kubectl rollout undo deployment.apps/frontend-deployment  --to-revision=2 // Faz o rollback para a versao especificada no to-revision
+kubectl rollout pause deployment.apps/frontend-deployment // Pausa a atualizacao dos pods (rollout)
+kubectl rollout resume deployment.apps/frontend-deployment // Volta a atualizacao dos pods, previamente pausada (rollout)
+kubectl scale deployment.apps/frontend-deployment --replicas=5 // Faz o scale do Deployment sem alterar o manifesto (Nao é uma boa prática)
+
+
+// Networking
+kubectl exec -it tomcat-pod -- bash // Acessa o container do tomcat
+apt update -y // Atualiza para poder instalar o ping
+apt install iputils-ping -y // Instala tool de ping
+exit // Para sair do container/pod
+
+// Namespaces
+kubectl get namespaces // Lista todos os namespaces
+kubectl get ns // Lista todos os namespaces
+kubectl get pods -n default // Lista pods de um namespaces especifico
+kubectl create namespace frontend --save-config // Cria um namespace de forma imperativa, sem usar manifesto (Nao é uma boa prática)
+kubectl apply -f tomcat-pod.yaml --namespace=backend // Cria pode em um namespace especifico
+kubectl config set-context --current --namespace=frontend // Muda o namespace corrente de default para o especificado
+kubectl delete namespaces frontend // Exclui o namespace especificado
+kubectl apply -f namespace.yaml // Aplica o manifesto do namespace
+
+
+// Services
+// Service com Cluster IP sem proxy serve apenas para comunicacao interna do cluster
+kubectl get services // Lista os servicos
+kubectl get svc // Lista os servicos
+kubectl apply -f clusterip-service.yaml // Aplica a criacao dos pods e do service
+kubectl run -it debian-pod --image=debian bash // Cria um pod de modo imperativo e abre o bash para testar a comunicacao
+apt update -y // Atualiza para poder instalar o ping
+apt install curl -y // Instala tool de curl
+curl 10.101.141.155:80 // Acessa o apache
+kubectl get services --all-namespaces -o wide // Lista todos os servicos de todos os namespaces com mais detalhes
+kubectl describe services frontend-service // Mostra detalhes do servico especifico
+kubectl delete services frontend-service --namespace=default // Exclui o service do namespace correto, nao delete os pods
+
+
+// NodePort Services
+// Adicionando nodePort: 30008 ao yaml
+// Mudando Type para NodePort
+kubectl describe service nodeport-service
+minikube service --url nodeport-service // Acessar service apenas para test/localmente
+kubectl get nodes -o yaml | grep address
+
+// LoadBalancer Services
+// Mudando Type para LoadBalancer
+
+// Volumes 
+ apt install procps -y // Instala ferramenta para verificar processos
+
+// DaemonSets
+kubectl get nodes
+kubectl get daemonsets
+kubectl get ds
+minikube node add
+kubectl get pods -o wide --field-selector spec.nodeName=minikube // Busca pods por node
+kubectl delete ds DS_NAME --cascade=orphan // Pods orphan de daemonsets
+kubectl get pods -o wide --field-selector spec.nodeName=minikube 
+kubectl delete -f NAME_MANIFEST.yaml // Deleta de acordo com o manifesto
+
+
+// Jobs
+// Common Container Exit Codes
+// - Code 1: Application error
+// - Code 126: Command invoke error
+// - Code 127: File or directory not found
+// - Code 134: Abnormal termination - Abort
+// - Code 137: Immediate termination - Sig Kill
+// - Code 139: Segmentation fault - Erro de acesso a memoria
+// - Code 255: Exit Status Out of Range
+// - Code 0: Purposely stopped - Success
+kubectl apply -f job.yaml
+kubectl get jobs
+kubectl logs job-sq27q // Mostra o log do job cujo nome do pod é job-sq27q
+kubectl delete job job // Deleta o job cujo nome é job
+
+
+// ConfigMap
+kubectl get cm
+kubectl get configmap
+kubectl create cm my-cm --from-file=my-app-file.txt --from-literal=my-description=testing // Cria config map a partir de um arquivo
+
+
